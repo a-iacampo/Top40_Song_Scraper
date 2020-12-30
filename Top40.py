@@ -70,24 +70,27 @@ def scrapeSongs():
         dfSheets = pd.DataFrame([], columns=['Song', 'Artist',
                                              'Date Added', 'Downloaded'])
 
+    dfSheets['Song'] = dfSheets['Song'].str.lower()
+    dfSheets['Artist'] = dfSheets['Artist'].str.lower()
+
     # Scraping
     try:
         tracks = soup.find(
             'div', class_='component-container component-chartlist block').find_all('figcaption')
     except:
         messagebox.showerror(
-            'Error', 'Please enter a url from the weekly charts')
+            'Error', 'Please enter a url from the weekly charts or verify if the site is working')
         return
 
     # Get songs, check for duplicates & append to Excel file
     newSongs = []
     for track in tracks:
         try:
-            song = track.find('a', class_='track-title').string
-            artist = track.find('a', class_='track-artist').string
+            song = track.find('a', class_='track-title').string.lower()
+            artist = track.find('a', class_='track-artist').string.lower()
         except:
-            song = track.find('span', class_='track-title').string
-            artist = track.find('span', class_='track-artist').string
+            song = track.find('span', class_='track-title').string.lower()
+            artist = track.find('span', class_='track-artist').string.lower()
         else:
             pass
 
@@ -96,6 +99,8 @@ def scrapeSongs():
                 pd.Series([song, artist, date, None], index=df.columns))
 
     newDf = df.append(newSongs, ignore_index=True)
+    newDf['Song'] = newDf['Song'].str.title()
+    newDf['Artist'] = newDf['Artist'].str.title()
 
     # Write to Excel file
     try:

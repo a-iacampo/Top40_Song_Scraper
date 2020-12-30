@@ -1,0 +1,7 @@
+dist
+build
+__pycache__
+.idea
+music.ico
+Top40 Songs.xlsx
+Top40.spec

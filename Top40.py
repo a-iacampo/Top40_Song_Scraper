@@ -19,7 +19,7 @@ def scrapeSongs():
         messagebox.showwarning('Warning', 'Please enter a url')
         return
 
-    if not 'www.at40.com/charts/' in url:
+    if not 'www.americantop40.com/charts/' in url:
         messagebox.showwarning('Warning', 'Please enter a url from AT40')
         return
 

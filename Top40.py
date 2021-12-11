@@ -45,6 +45,10 @@ def scrapeSongs():
     year = title[5]
     date = title[3] + " " + title[4] + " " + year
 
+    if not year.isnumeric():
+        messagebox.showerror('Error', 'Please verify that the site is working')
+        return
+
     # Get Excel file
     try:
         xlsx = pd.ExcelFile(path)
@@ -70,31 +74,44 @@ def scrapeSongs():
         dfSheets = pd.DataFrame([], columns=['Song', 'Artist',
                                              'Date Added', 'Downloaded'])
 
-    dfSheets['Song'] = dfSheets['Song'].str.lower()
-    dfSheets['Artist'] = dfSheets['Artist'].str.lower()
+    try:
+        dfSheets['Song'] = dfSheets['Song'].str.lower()
+        dfSheets['Artist'] = dfSheets['Artist'].str.lower()
+    except:
+        pass
 
     # Scraping
     try:
-        tracks = soup.find(
-            'div', class_='component-container component-chartlist block').find_all('figcaption')
+        tracks = soup.find('section', class_='col-left').find_all('figcaption')
     except:
         messagebox.showerror(
-            'Error', 'Please enter a url from the weekly charts or verify if the site is working')
+            'Error', 'Please enter a url from the weekly charts or verify that the site is working')
         return
 
     # Get songs, check for duplicates & append to Excel file
     newSongs = []
+    song = ''
+    artist = ''
     for track in tracks:
         try:
-            song = track.find('a', class_='track-title').string.lower()
-            artist = track.find('a', class_='track-artist').string.lower()
+            song = track.find('a', class_='track-title').string.lower().strip()
+            artist = track.find(
+                'a', class_='track-artist').string.lower().strip()
         except:
-            song = track.find('span', class_='track-title').string.lower()
-            artist = track.find('span', class_='track-artist').string.lower()
-        else:
-            pass
-
-        if not ((dfSheets['Song'] == song) & (dfSheets['Artist'] == artist)).any():
+            try:
+                song = track.find(
+                    'span', class_='track-title').string.lower().strip()
+                artist = track.find(
+                    'span', class_='track-artist').string.lower().strip()
+            except:
+                messagebox.showerror(
+                    'Error', 'Please enter a url from the weekly charts')
+                return
+        try:
+            if not ((dfSheets['Song'] == song) & (dfSheets['Artist'] == artist)).any():
+                newSongs.append(
+                    pd.Series([song, artist, date, None], index=df.columns))
+        except:
             newSongs.append(
                 pd.Series([song, artist, date, None], index=df.columns))
 
